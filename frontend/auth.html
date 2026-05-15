@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Residue Recon | Secure Portal</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        :root {
+            --everest-blue: #0b3d91;
+            --staff-red: #b91c1c;
+            --light-bg: #f8fafc;
+        }
+
+        body {
+            background: linear-gradient(rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.9)), 
+                        url('https://images.unsplash.com/photo-1596176530529-78163a4f7af2?q=80&w=2000');
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .auth-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 35px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #64748b;
+            background: transparent;
+            transition: 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            color: var(--everest-blue);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .tab-btn.staff-active.active {
+            color: var(--staff-red);
+        }
+
+        .brand-text {
+            font-weight: 800;
+            background: linear-gradient(to right, var(--everest-blue), #1d4ed8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-control {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .btn-primary { background: var(--everest-blue); border: none; padding: 12px; border-radius: 10px; font-weight: 600; }
+        .btn-staff { background: var(--staff-red); border: none; padding: 12px; border-radius: 10px; font-weight: 600; color: white; }
+
+        .hidden { display: none; }
+        .cursor-pointer { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="text-center mb-4">
+            <h3 class="brand-text">RESIDUE RECON</h3>
+            <p class="text-muted small">Centralized Authentication Terminal</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="tab-btn active" id="userTab" onclick="switchTab('user')">Citizen Portal</button>
+            <button class="tab-btn" id="staffTab" onclick="switchTab('staff')">Staff Admin</button>
+        </div>
+
+        <div id="userSection">
+            <form id="userLoginForm" autocomplete="off">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">CITIZEN EMAIL</label>
+                    <input type="email" id="loginEmail" class="form-control" placeholder="user@example.com" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted">PASSWORD</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-3 shadow-sm">Enter Portal</button>
+                <p class="small text-center text-muted">New here? <span class="text-primary fw-bold cursor-pointer" onclick="toggleUserForm()">Create Account</span></p>
+            </form>
+
+            <form id="userRegForm" class="hidden" autocomplete="off">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">FULL NAME</label>
+                    <input type="text" id="regName" class="form-control" placeholder="John Doe" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">EMAIL</label>
+                    <input type="email" id="regEmail" class="form-control" placeholder="john@example.com" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted">SET PASSWORD</label>
+                    <input type="password" id="regPassword" class="form-control" placeholder="Min 8 characters" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-3 shadow-sm">Register Now</button>
+                <p class="small text-center text-muted">Already have an account? <span class="text-primary fw-bold cursor-pointer" onclick="toggleUserForm()">Login</span></p>
+            </form>
+        </div>
+
+        <div id="staffSection" class="hidden">
+            <div class="alert alert-warning py-2 small text-center mb-3">
+                <i class="bi bi-shield-lock-fill"></i> Restricted Personnel Area
+            </div>
+            <form id="staffLoginForm" autocomplete="off">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">ADMIN USERNAME</label>
+                    <input type="text" id="staffUser" class="form-control" placeholder="admin" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted">ADMIN PASSWORD</label>
+                    <input type="password" id="staffPass" class="form-control" placeholder="admin" required>
+                </div>
+                <button type="submit" class="btn btn-staff w-100 shadow-sm">Authorize & Login</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000";
+
+        function switchTab(role) {
+            document.querySelectorAll('form').forEach(f => f.reset());
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'staff-active'));
+            
+            if (role === 'user') {
+                document.getElementById('userTab').classList.add('active');
+                document.getElementById('userSection').classList.remove('hidden');
+                document.getElementById('staffSection').classList.add('hidden');
+            } else {
+                document.getElementById('staffTab').classList.add('active', 'staff-active');
+                document.getElementById('userSection').classList.add('hidden');
+                document.getElementById('staffSection').classList.remove('hidden');
+            }
+        }
+
+        function toggleUserForm() {
+            document.getElementById('userLoginForm').classList.toggle('hidden');
+            document.getElementById('userRegForm').classList.toggle('hidden');
+        }
+
+        // 1. Citizen Login
+        document.getElementById('userLoginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append("email", document.getElementById('loginEmail').value);
+            formData.append("password", document.getElementById('loginPassword').value);
+
+            try {
+                const res = await fetch(`${API_URL}/login`, { method: "POST", body: formData });
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem("user_name", data.name);
+                    localStorage.setItem("user_email", data.email);
+                    
+                    // Logic for staff flag from backend
+                    if(data.is_staff) {
+                        localStorage.setItem("staff_authenticated", "true");
+                        window.location.href = "staff.html";
+                    } else {
+                        window.location.href = "index.html";
+                    }
+                } else {
+                    alert(data.detail || "Invalid Credentials");
+                }
+            } catch (err) { alert("Backend Offline."); }
+        };
+
+        // 2. Staff Admin Login (UPDATED)
+        document.getElementById('staffLoginForm').onsubmit = (e) => {
+            e.preventDefault();
+            const u = document.getElementById('staffUser').value;
+            const p = document.getElementById('staffPass').value;
+
+            // Proper Redirect to staff.html
+            if (u === 'admin' && p === 'admin') {
+                localStorage.setItem("staff_authenticated", "true");
+                localStorage.setItem("user_name", "System Administrator");
+                window.location.href = "staff.html";
+            } else {
+                alert("Access Denied: Invalid Administrative Credentials");
+            }
+        };
+
+        // 3. Registration
+        document.getElementById('userRegForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append("name", document.getElementById('regName').value);
+            formData.append("email", document.getElementById('regEmail').value);
+            formData.append("password", document.getElementById('regPassword').value);
+
+            try {
+                const res = await fetch(`${API_URL}/register`, { method: "POST", body: formData });
+                if (res.ok) {
+                    alert("Registration Successful! Please login.");
+                    toggleUserForm();
+                } else {
+                    const data = await res.json();
+                    alert(data.detail || "Registration failed");
+                }
+            } catch (err) { alert("Connection failed."); }
+        };
+    </script>
+</body>
+</html>
