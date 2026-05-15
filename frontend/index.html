@@ -3,49 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report Issue | CivicAI Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Residue Recon | Smart Bengaluru Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+    <style>
+        :root {
+            --everest-blue: #0b3d91;
+            --everest-gold: #ffc107;
+            --everest-bg: #f4f7fb;
+            --everest-red: #ff0000;
+        }
+
+        body { background-color: var(--everest-bg); font-family: "Segoe UI", sans-serif; overflow-x: hidden; }
+        
+        .custom-navbar { background: linear-gradient(90deg, var(--everest-blue), #1456c5); padding: 14px 0; }
+        .hero-section {
+            background: linear-gradient(45deg, var(--everest-blue), #1e3c72);
+            color: white; border-radius: 0 0 40px 40px;
+            padding: 50px 0; margin-bottom: -30px;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+            border: none; border-radius: 20px; transition: 0.3s ease;
+            background: white; box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        .dashboard-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
+
+        .icon-box {
+            width: 50px; height: 50px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 15px; font-size: 1.5rem;
+        }
+        .bg-red { background: rgba(229, 57, 53, 0.1); color: #e53935; }
+        .bg-green { background: rgba(67, 160, 71, 0.1); color: #43a047; }
+        .bg-gold { background: rgba(255, 193, 7, 0.1); color: #ffb300; }
+
+        /* Map Styling */
+        #map { height: 550px; width: 100%; border-radius: 15px; border: 1px solid #ddd; z-index: 1; }
+
+        /* Pulsing Marker CSS */
+        .ping-container { position: relative; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; }
+        .ping-dot {
+            width: 10px; height: 10px; background-color: var(--everest-red);
+            border: 2px solid #ffffff; border-radius: 50%; z-index: 2;
+        }
+        .ping-pulse {
+            position: absolute; width: 10px; height: 10px;
+            background-color: var(--everest-red); border-radius: 50%;
+            z-index: 1; animation: ping-animation 1.5s infinite ease-out;
+        }
+        @keyframes ping-animation {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(3.5); opacity: 0; }
+        }
+
+        .pulse-badge { animation: pulse-red-badge 2s infinite; }
+        @keyframes pulse-red-badge {
+            0% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 82, 82, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); }
+        }
+    </style>
 </head>
-<body data-protected="true">
-    <nav class="app-nav">
-        <a class="brand" href="user.html">CivicAI Tracker</a>
-        <div class="nav-links">
-            <a href="user.html">Dashboard</a>
-            <a class="active" href="index.html">Report Issue</a>
-            <a href="vittal.html">Live Map</a>
-            <a href="login.html" data-guest-only hidden>Login</a>
-            <a href="register.html" data-guest-only hidden>Register</a>
-            <a href="#" data-auth-only data-logout hidden>Logout</a>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark custom-navbar shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-shield-check"></i> Residue Recon </a>
+            <div class="ms-auto d-flex align-items-center">
+                <span class="text-white me-3 d-none d-md-inline">Welcome, <strong id="display-name">Agent</strong></span>
+                <button class="btn btn-warning fw-bold rounded-pill px-4 me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#reportModal">
+                    <i class="bi bi-plus-lg"></i> New Report
+                </button>
+                <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </div>
         </div>
     </nav>
 
-    <main class="page-shell">
-        <section class="intro-panel">
-            <p class="eyebrow">Citizen report</p>
-            <h1>Submit a civic issue for AI validation</h1>
-            <p>
-                Upload a clear photo, add a short description, and your current location will be attached automatically.
-            </p>
-        </section>
+    <section class="hero-section text-center shadow">
+        <div class="container pt-4">
+            <h1 class="fw-bold text-uppercase tracking-wider">Bengaluru Smart City Monitor</h1>
+            <p class="lead opacity-75">AI Verification Pipeline & Geospatial Tracking</p>
+        </div>
+    </section>
 
-        <section class="form-panel">
-            <form id="submissionForm">
-                <label for="name">Your name</label>
-                <input type="text" id="name" placeholder="Enter name" required>
+    <div class="container py-5 mt-4">
+        <div class="row g-4 mb-4 text-center">
+            <div class="col-md-4">
+                <div class="card dashboard-card p-4">
+                    <div class="icon-box bg-red mx-auto"><i class="bi bi-geo"></i></div>
+                    <h6 class="text-muted text-uppercase small fw-bold">Active Issues</h6>
+                    <h2 id="stat-total" class="fw-bold text-dark">0</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card dashboard-card p-4">
+                    <div class="icon-box bg-green mx-auto"><i class="bi bi-cpu"></i></div>
+                    <h6 class="text-muted text-uppercase small fw-bold">AI Validated</h6>
+                    <h2 id="stat-resolved" class="fw-bold text-dark">0</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card dashboard-card p-4">
+                    <div class="icon-box bg-gold mx-auto"><i class="bi bi-star-fill"></i></div>
+                    <h6 class="text-muted text-uppercase small fw-bold">My Points</h6>
+                    <h2 id="stat-points" class="fw-bold text-warning">0</h2>
+                </div>
+            </div>
+        </div>
 
-                <label for="description">Issue description</label>
-                <textarea id="description" placeholder="Garbage dump near bus stop, pothole on main road..." rows="5"></textarea>
+        <div class="row g-4">
+            <div class="col-lg-12">
+                <div class="card dashboard-card p-3">
+                    <div class="p-2 d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0"><i class="bi bi-map text-primary"></i> Real-time Incident Heatmap</h5>
+                        <span class="badge bg-danger rounded-pill pulse-badge px-3">BENGALURU LIVE</span>
+                    </div>
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <label for="image">Issue photo</label>
-                <input type="file" id="image" accept="image/*" required>
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0" style="border-radius: 25px;">
+                <div class="modal-header bg-dark text-white border-0 py-3">
+                    <h5 class="modal-title fw-bold">AI Civic Report</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="submissionForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted">Issue Type</label>
+                            <select class="form-select rounded-3" id="description">
+                                <option value="trash">Trash / Waste Dump</option>
+                                <option value="pothole">Pothole</option>
+                                <option value="sewage">Sewage Overflow</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted">Evidence (Photo)</label>
+                            <input type="file" class="form-control rounded-3" id="image" accept="image/*" required>
+                        </div>
+                        <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold py-3 rounded-3 shadow-sm">
+                            Submit for AI Validation
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <button type="submit">Submit Report</button>
-                <p class="helper-text">Location permission is required when you submit.</p>
-            </form>
-        </section>
-    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
-    <script src="session.js?v=2"></script>
-    <script src="h1.js"></script>
+    <script>
+        // SESSION PROTECTION
+        if (!localStorage.getItem("user_name")) { window.location.href = "auth.html"; }
+        const userName = localStorage.getItem("user_name");
+        document.getElementById('display-name').innerText = userName;
+
+        function logout() { localStorage.clear(); window.location.href = "auth.html"; }
+
+        // INITIALIZE MAP
+        const map = L.map('map', { zoomControl: false }).setView([12.9716, 77.5946], 12);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        let heat = L.heatLayer([], { radius: 25, blur: 20, maxZoom: 10 }).addTo(map);
+        let markerLayer = L.layerGroup().addTo(map);
+
+        // SYNC DATA
+        async function updateDashboard() {
+            try {
+                // 1. Stats
+                const statsRes = await fetch(`http://127.0.0.1:8000/statistics`);
+                const stats = await statsRes.json();
+                document.getElementById('stat-total').innerText = stats.total_reports || 0;
+                document.getElementById('stat-resolved').innerText = stats.resolved_issues || 0;
+                document.getElementById('stat-points').innerText = localStorage.getItem("user_points") || "0";
+
+                // 2. Locations
+                const locRes = await fetch(`http://127.0.0.1:8000/get-locations`);
+                const data = await locRes.json();
+
+                // 3. Heatmap & Markers
+                heat.setLatLngs(data.map(l => [parseFloat(l.lat), parseFloat(l.lng), 0.7]));
+                markerLayer.clearLayers();
+                data.forEach(loc => {
+                    const icon = L.divIcon({
+                        className: 'custom-ping',
+                        html: `<div class="ping-container"><div class="ping-pulse"></div><div class="ping-dot"></div></div>`,
+                        iconSize: [20, 20], iconAnchor: [10, 10]
+                    });
+                    L.marker([loc.lat, loc.lng], { icon: icon })
+                        .bindPopup(`<b>${loc.category.toUpperCase()}</b><br>Reported by: ${loc.user_name || 'Citizen'}`)
+                        .addTo(markerLayer);
+                });
+            } catch (e) { console.warn("Syncing..."); }
+        }
+
+        // FORM SUBMISSION
+        document.getElementById("submissionForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("submitBtn");
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Analyzing...';
+
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                const formData = new FormData();
+                formData.append("name", userName);
+                formData.append("description", document.getElementById("description").value);
+                formData.append("latitude", pos.coords.latitude);
+                formData.append("longitude", pos.coords.longitude);
+                formData.append("image", document.getElementById("image").files[0]);
+
+                try {
+                    const res = await fetch("http://127.0.0.1:8000/upload", { method: "POST", body: formData });
+                    const result = await res.json();
+                    
+                    if (res.ok) {
+                        alert(`AI VALIDATED: Identified as ${result.category}`);
+                        let pts = parseInt(localStorage.getItem("user_points") || "0");
+                        localStorage.setItem("user_points", pts + 150);
+                        bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
+                        updateDashboard();
+                    } else {
+                        alert(`REJECTED: ${result.detail}`);
+                    }
+                } catch (err) { alert("Backend server not reached."); }
+                finally { btn.disabled = false; btn.innerText = "Submit for AI Validation"; }
+            }, () => alert("GPS required for report submission."));
+        });
+
+        updateDashboard();
+        setInterval(updateDashboard, 15000);
+    </script>
 </body>
 </html>
