@@ -4,14 +4,14 @@
 **Goal:** A web-based heatmap platform that uses AI to detect potholes/garbage and PostGIS to prevent duplicate reporting.
 
 ## 👥 Team Members & USNs
-1: (Team Lead)	Prajesh.L	1BM25MC066	prajeshl.mca25@bmsce.ac.in		
-2: Vishwa Moorthy.S	1BM25MC110	vishwamoorthy.mca25@bmsce.ac.in		
-3: Prashant Kumar Thakur	1BM25MC114	prashantkumar.mca25@bmsce.ac.in		
-4: Piyush Kumar	1BM25MC065	Piyushkumar.mca25@bmsce.ac.in		
-5: Vittal Satteppa Kempasatti	1BM25MC111	vittalsatteppa.mca25@bmsce.ac.in		
-6: S P Vijayraj	1BM25MC076	spvijayraj.mca25@bmsce.ac.in		
-7: Rishon raymond Barnes	1BM25MC074	rishonraymond.mca25@bmsce.ac.in		
-8: Sarvasetty Varshitha 	1BM25MC081 	srvasetty.mca25@bmsce.ac.in		
+1: (Team Lead)	Prajesh.L	1BM25MC066	prajeshl.mca25@bmsce.ac.in
+2: Vishwa Moorthy.S	1BM25MC110	vishwamoorthy.mca25@bmsce.ac.in
+3: Prashant Kumar Thakur	1BM25MC114	prashantkumar.mca25@bmsce.ac.in
+4: Piyush Kumar	1BM25MC065	Piyushkumar.mca25@bmsce.ac.in
+5: Vittal Satteppa Kempasatti	1BM25MC111	vittalsatteppa.mca25@bmsce.ac.in
+6: S P Vijayraj	1BM25MC076	spvijayraj.mca25@bmsce.ac.in
+7: Rishon raymond Barnes	1BM25MC074	rishonraymond.mca25@bmsce.ac.in
+8: Sarvasetty Varshitha 	1BM25MC081 	srvasetty.mca25@bmsce.ac.in
 
 ## 🛠️ Tech Stack
 * **Frontend:** HTML5, CSS3, JavaScript (Leaflet.js for Heatmaps)
